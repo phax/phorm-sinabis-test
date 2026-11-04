@@ -83,8 +83,8 @@ public final class MainFuncTest
                                "8",
                                // "--manifest",
                                // "zb00000.jsonl",
-                               "--limit",
-                               Long.toString (nLimit),
+                               // "--limit",
+                               // Long.toString (nLimit),
                                "--out-dir",
                                aOutDir.toString () });
 
