@@ -162,8 +162,10 @@ public final class CoverageMain
             final Set <String> aSet = aExtractors.get ().extract (aIS);
             for (final String sFeature : aSet)
               aFeatures.computeIfAbsent (sFeature, _ -> new FeatureStat ()).add (aEntry);
+
             final String sDesc = InvoiceFeatureExtractor.describe (aSet);
             aCombinations.computeIfAbsent (sDesc, _ -> new FeatureStat ()).add (aEntry);
+
             synchronized (aCSV)
             {
               aCSV.write (aEntry.getIdx () + "," + _csv (aEntry.getXMLFile ()) + "," + _csv (sDesc));

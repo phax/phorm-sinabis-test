@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.helger.base.io.nonblocking.NonBlockingBufferedWriter;
+import com.helger.base.string.StringReplace;
 import com.helger.base.timing.StopWatch;
 import com.helger.collection.commons.CommonsArrayList;
 import com.helger.collection.commons.CommonsEnumMap;
@@ -173,7 +174,7 @@ public final class Main
 
   private static String _csv (final String s)
   {
-    return '"' + s.replace ("\"", "\"\"") + '"';
+    return '"' + StringReplace.replaceAll (s, "\"", "\"\"") + '"';
   }
 
   /** Shared state of a run */
@@ -391,18 +392,18 @@ public final class Main
          .append (String.format (Locale.ROOT, "%.4f", Double.valueOf (aKind.getAsDouble ("invalid_percent", 0))))
          .append (" |\n");
       aSB.append ("| throughput | ")
-         .append (String.format (Locale.ROOT, "%.1f / s", Double.valueOf (aKind.getAsDouble ("throughput_per_second", 0))))
+         .append (String.format (Locale.ROOT,
+                                 "%.1f / s",
+                                 Double.valueOf (aKind.getAsDouble ("throughput_per_second", 0))))
          .append (" |\n\n");
       aSB.append ("| Latency (ms) | avg | median | p90 | p95 | p99 | max |\n|---|---|---|---|---|---|---|\n");
-      for (final Map.Entry <String, IJsonObject> aLat : Map.of ("client (wall clock)",
-                                                                aClient,
-                                                                "server (reported)",
-                                                                aServer).entrySet ())
+      for (final var aLat : Map.of ("client (wall clock)", aClient, "server (reported)", aServer).entrySet ())
       {
         final IJsonObject a = aLat.getValue ();
         aSB.append ("| ").append (aLat.getKey ());
         for (final String sKey : new String [] { "avg_ms", "median_ms", "p90_ms", "p95_ms", "p99_ms", "max_ms" })
-          aSB.append (" | ").append (String.format (Locale.ROOT, "%.1f", Double.valueOf (a.getAsDouble (sKey, Double.NaN))));
+          aSB.append (" | ")
+             .append (String.format (Locale.ROOT, "%.1f", Double.valueOf (a.getAsDouble (sKey, Double.NaN))));
         aSB.append (" |\n");
       }
       aSB.append ("\nFindings by error ID (invalid documents only): ")
@@ -497,7 +498,7 @@ public final class Main
                            Runtime.getRuntime ().availableProcessors () +
                            " CPUs");
       aJson.add ("hybrid_country", aCfg.m_sCountry);
-      for (final Map.Entry <ECallKind, KindStats> aEntry : aRun.m_aStats.entrySet ())
+      for (final var aEntry : aRun.m_aStats.entrySet ())
         aJson.add (aEntry.getKey ().getID (), aEntry.getValue ().getAsJson (nWallMillis));
 
       Files.writeString (aCfg.m_aOutDir.resolve ("summary.json"),
