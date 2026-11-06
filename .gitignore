@@ -8,6 +8,7 @@ target/
 
 .project
 .classpath
+.DS_Store
 potential.md
 release.properties
 zz
