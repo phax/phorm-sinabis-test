@@ -31,7 +31,7 @@ java -jar target/phorm-sinabis-test-1.0.0-SNAPSHOT.jar \
   --threads 8 --mode both --warmup 200 --limit 1000
 ```
 
-Omit `--limit` for the full 127,500 invoices. Run `java -jar ... ` without arguments for all options.
+Omit `--limit` for the full 1,000,000 invoices. Run `java -jar ... ` without arguments for all options.
 
 # Coverage analysis
 
@@ -64,6 +64,44 @@ Latencies are given as wall clock time measured by the client and as the duratio
 
 Sinabis claims that all files are valid, so every `INVALID` outcome is either a defect in the data set or a defect in phorm or the phive rules - the tool does not decide which.
 `CALL_ERROR` means phorm produced no verdict at all (timeout, HTTP error, rejected token).
+
+# Results of the full run (2026-11-04)
+
+Both modes against the complete data set, 1,000,000 invoices each (2,000,000 calls).
+The raw files are in [src/test/resources/2026-11-04](src/test/resources/2026-11-04): `summary.md`, `summary.json` and `results.csv.zip` (the zipped `results.csv`, 217 MB unpacked).
+
+| Setting | Value |
+|---|---|
+| Started | 2026-11-04T20:54:37Z |
+| phorm | `http://localhost:8090`, 768 VESIDs loaded |
+| Threads | 8 |
+| Warmup | 0 |
+| Wall time | 9,394 s (about 2 h 37 min) |
+| Client | Java 27.0.1.0.2, Mac OS X aarch64, 14 CPUs |
+| Hybrid country | `DE` |
+
+| | XML (`/api/dd_and_validate`) | PDF (`/api/hybrid_validate`) |
+|---|---|---|
+| total | 1,000,000 | 1,000,000 |
+| valid | 999,969 | 999,966 |
+| invalid | 0 | 0 |
+| call_error | 1 | 0 |
+| file_error | 30 | 34 |
+| payload | 13.95 GB | 54.53 GB |
+| throughput | 106.4 / s | 106.4 / s |
+| determined VESID | `de.xrechnung:cii:3.0.2` (all valid) | `de.xrechnung:cii:3.0.2` (all valid) |
+
+| Latency (ms) | avg | median | p90 | p95 | p99 | max |
+|---|---|---|---|---|---|---|
+| XML client (wall clock) | 6.7 | 4 | 11 | 15 | 31 | 1259 |
+| XML server (reported) | 4.5 | 3 | 7 | 10 | 15 | 1188 |
+| PDF client (wall clock) | 51.2 | 41 | 96 | 115 | 153 | 1316 |
+| PDF server (reported) | 49.4 | 39 | 93 | 112 | 149 | 1315 |
+
+* No file was rated `INVALID` by phorm, so there are no findings by error ID.
+* The 1 XML `CALL_ERROR` is of type `request`.
+* The 30 XML and 34 PDF `FILE_ERROR` outcomes are files that could not be read by the client, so they never reached phorm.
+  The IO errors stem from the source files residing on a NAS.
 
 # License
 
